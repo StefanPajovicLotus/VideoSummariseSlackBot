@@ -6,6 +6,19 @@ import logging
 from dotenv import load_dotenv
 from slack_bot import SlackBot
 
+def handler(request):
+    # Check if the app is running on Vercel
+    if os.environ.get("VERCEL") == "1":
+        return {
+            "statusCode": 200,
+            "body": "The app is running on Vercel!"
+        }
+    else:
+        return {
+            "statusCode": 200,
+            "body": "The app is NOT running on Vercel."
+        }
+        
 def setup_logging():
     kw = {
         'format': '[%(asctime)s] %(message)s',
