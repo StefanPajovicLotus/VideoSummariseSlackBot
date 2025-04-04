@@ -6,18 +6,27 @@ import google.generativeai as genai
 from video_processor import VideoProcessor
 import tempfile
 
+
 class SlackBot:
     def __init__(self):
-        self.app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+        # Read tokens from environment variables using os.environ
+        slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
+        gemini_api_key = os.environ.get("GEMINI_API_KEY")
+
+        # Check if tokens are available
+        if not slack_bot_token or not gemini_api_key:
+            raise ValueError("Slack bot token or Gemini API key is missing.")
         
-        # Configure Gemini
-        self.api_key = os.environ.get("GOOGLE_API_KEY")
-        genai.configure(api_key=self.api_key)
+        # Initialize Slack App with the bot token from environment
+        self.app = App(token=slack_bot_token)
+
+        # Configure Gemini with API key from environment
+        genai.configure(api_key=gemini_api_key)
         self.model = genai.GenerativeModel('gemini-pro')
-        
-        # Initialize VideoProcessor
-        self.video_processor = VideoProcessor(api_key=self.api_key)
-        
+
+        # Initialize VideoProcessor with Gemini API key
+        self.video_processor = VideoProcessor(api_key=gemini_api_key)
+
         # Register event handlers
         self.app.event("message")(self.handle_message_events)
         self.app.event("file_shared")(self.handle_file_shared)
@@ -27,6 +36,7 @@ class SlackBot:
         try:
             if "text" in body["event"]:
                 message = body["event"]["text"]
+                say(message)
                 response = self.model.generate_content(message)
                 say(response.text,
                     thread_ts=body["event"].get("thread_ts", body["event"]["ts"]))
@@ -95,4 +105,4 @@ class SlackBot:
             handler.start()
         except Exception as e:
             logging.error(f"Error starting bot: {e}")
-            raise 
+            raise

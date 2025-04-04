@@ -8,7 +8,7 @@ from typing import List, Optional
 import numpy as np
 from PIL import Image
 import shutil
-from google import genai
+import google.generativeai as genai
 
 class VideoProcessor:
     def __init__(self, api_key):
@@ -26,6 +26,7 @@ class VideoProcessor:
             headers = {
                 'Authorization': f'Bearer {os.environ.get("SLACK_BOT_TOKEN")}'
             }
+           
             response = requests.get(video_url, headers=headers, stream=True)
             response.raise_for_status()
             
